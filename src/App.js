@@ -1,4 +1,6 @@
-import {getAuth, signInWithPopup, GoogleAuthProvider, GithubAuthProvider, signOut} from 'firebase/auth'
+import 'bootstrap/dist/css/bootstrap.min.css';
+import { Button, Card } from 'react-bootstrap';
+import {getAuth, signInWithPopup, GoogleAuthProvider, GithubAuthProvider, signOut, FacebookAuthProvider} from 'firebase/auth'
 import { useState } from 'react';
 import './App.css';
 import initializeAuthentication from './Firebase/Firebase.initialize';
@@ -7,6 +9,7 @@ initializeAuthentication();
 
 const googleProvider = new GoogleAuthProvider();
 const gitHubProvider = new GithubAuthProvider();
+const facebookProvider = new FacebookAuthProvider();
 
 
 function App() {
@@ -40,6 +43,19 @@ function App() {
     })
   }
 
+  const handleFacebookSignIn = () => {
+    signInWithPopup(auth, facebookProvider)
+    .then(result => {
+      console.log(result.user)
+      const {displayName, photoURL} = result.user
+      const loggedInUser = {
+        name: displayName,
+        photo: photoURL
+      }
+      setUser(loggedInUser)
+    })
+  }
+
   const handleSignOut = () => {
     signOut(auth)
     .then(() => {
@@ -49,16 +65,35 @@ function App() {
 
   return (
     <div className="App">
-      {!user.name ? <div>
-      <button onClick={handleGoogleSignIn}>Google Sign in</button>
-      <button onClick={handleGitHubSignIn}>GitHub Sign In</button>
+      
+  
+
+      {!user.name ? <div className="btn-style">
+      <h1>Sign In With</h1>
+        <Button onClick={handleGoogleSignIn} variant="primary">Google Sign in</Button>
+        <br />
+        <Button onClick={handleGitHubSignIn} variant="secondary">GitHub Sign In</Button>
+        <br />
+        <Button onClick={handleFacebookSignIn} variant="success">Facebook Sign In</Button>
+      
       </div> :
-      <button onClick={handleSignOut}>Sign Out</button>}
+      <div>
+        <h1>Sign Out With</h1>
+        <Button style={{display: 'none'}} onClick={handleSignOut} variant="success">Sign Out</Button>
+      </div>
+      
+      }
       {
-        user.name && <div>
-          <h2>Welcome: {user.name}</h2>
-          <p>I know your email address: {user.email}</p>
-          <img src={user.photo} alt="" />
+        user.name && <div className="card-style">
+          <Card>
+              <Card.Img className="card-img" variant="top" src={user.photo} />
+              <Card.Body>
+              <Card.Title>Welcome: {user.name}</Card.Title>
+              <Card.Title>I know your email address: {user.email}</Card.Title>
+    
+              <Button onClick={handleSignOut} variant="success">Sign Out</Button>
+            </Card.Body>
+          </Card>
           </div>
       }
     </div>
